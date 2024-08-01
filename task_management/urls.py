@@ -16,7 +16,30 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from user_app import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('',views.home),
+    path('login',views.user_login),
+    path('forgot_password',views.request_otp),
+    path('verify_otps',views.verify_otps),
+    path('logout', views.logout, name='logout'),
+    path('registration',views.registration),
+    path('otp_verify',views.otp_verify),
+    path('profile',views.profile),
+    path('edit_profile',views.edit_profile),
+    path('personal_task',views.personal_task),
+    path('add_personal_task',views.create_personal_task),
+    path('view_personal_task',views.personal_task_list),
+    path('update_personal_task/<int:personal_task_id>',views.update_personal_task),
+    path('remove/<int:personal_task_id>',views.remove_personal_task),
+    path('assigned_task',views.assigned_task_list),
+    path('admin_assigned_task',views.view_assigned_tasks),
+    path('team_assigned_task',views.team_management),
+    path('project',views.project),
+    path('edit_task/<int:task_id>',views.edit_task_status),
+    path('edit_team/<int:task_id>/',views.edit_task),
+    path('edit_project/<int:project_id>/',views.edit_project),
+    path('report',views.report)
 ]
