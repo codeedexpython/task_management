@@ -35,7 +35,9 @@ def home(request):
             'total_completed_tasks': total_completed_tasks,
             'total_completed_projects': total_completed_projects,
         }
-
+        search_query = request.GET.get('search_query')
+        if search_query and search_query.lower() == 'personal task':
+            return redirect('/view_personal_task')
         return render(request, 'index.html', context)
     else:
         return redirect('/login')
