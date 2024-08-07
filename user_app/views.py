@@ -21,7 +21,8 @@ def home(request):
         total_tasks = Task.objects.filter(user_id=user_id).count()
         total_projects = Project.objects.filter(user_id=user_id).count()
         total_completed_tasks = Task.objects.filter(user_id=user_id, status='done').count()
-        total_completed_projects = Project.objects.filter(user_id=user_id, status='done').count()
+        # total_completed_projects = Project.objects.filter(user_id=user_id, status='done').count()
+        total_personal_tasks = Personal_task.objects.filter(user_id=user).count()
 
         recent = Task.objects.all().order_by('-created_at')[:1]
         projects = Project.objects.filter(status='done').order_by('-updated_at')
@@ -32,8 +33,10 @@ def home(request):
             'pro': projects,
             'total_tasks': total_tasks,
             'total_projects': total_projects,
+            'total_personal_tasks': total_personal_tasks,
+
             'total_completed_tasks': total_completed_tasks,
-            'total_completed_projects': total_completed_projects,
+            # 'total_completed_projects': total_completed_projects,
         }
         search_query = request.GET.get('search_query')
         if search_query and search_query.lower() == 'personal task':
@@ -195,12 +198,18 @@ def logout(request):
     return redirect('/login')
 
 def personal_task(request):
-    return render(request,'personal_task.html')
+    user_id = request.session.get("user_id")
+    if user_id:
+        user = User.objects.get(user_id=user_id)
+        return render(request,'personal_task.html',{'user':user})
+    else:
+        return redirect('/login')
 
 
 def create_personal_task(request):
     if 'user_id' in request.session:
         user_id = request.session.get("user_id")
+        user = User.objects.get(user_id=user_id)
         if request.method == "POST":
             title = request.POST.get('title')
             description = request.POST.get('description')
@@ -214,16 +223,22 @@ def create_personal_task(request):
             data.save()
 
             return redirect('/view_personal_task')
-    return render(request, 'add_personal_task.html')
+    return render(request, 'add_personal_task.html',{'user':user})
 
 def personal_task_list(request):
-    tasks = Personal_task.objects.all()
-    return render(request, 'view_personal_task.html', {'tasks': tasks})
+    user_id = request.session.get("user_id")
+    if user_id:
+        user = User.objects.get(user_id=user_id)
+        tasks = Personal_task.objects.filter(user_id=User.objects.get(user_id=request.session['user_id']))
+        return render(request, 'view_personal_task.html', {'tasks': tasks,'user':user})
+    else:
+        return redirect('/login')
 
 
 def update_personal_task(request, personal_task_id):
-    if 'user_id' in request.session:
-        user_id = request.session.get("user_id")
+    user_id = request.session.get("user_id")
+    if user_id:
+        user = User.objects.get(user_id=user_id)
         data=Personal_task.objects.filter(personal_task_id=personal_task_id)
         if request.method == "POST":
             title = request.POST.get('title')
@@ -233,14 +248,16 @@ def update_personal_task(request, personal_task_id):
             user = User.objects.get(pk=user_id)
 
             data = Personal_task.objects.get(personal_task_id=personal_task_id)
-            data.title=title,
-            data.description=description,
-            data.status=status,
+            data.title=title
+            data.description=description
+            data.status=status
                 # users_id=user
             data.save()
 
             return redirect('/view_personal_task')
-    return render(request, 'edit_personal_task.html',{'tasks':data})
+        return render(request, 'edit_personal_task.html',{'tasks':data,'user':user})
+    else:
+        return redirect('/login')
 
 def remove_personal_task(request,personal_task_id):
     print("remove fun called")
@@ -249,30 +266,39 @@ def remove_personal_task(request,personal_task_id):
     return redirect('/view_personal_task')
 
 def assigned_task_list(request):
+    user_id = request.session.get("user_id")
+    if user_id:
+        user = User.objects.get(user_id=user_id)
+
     # tasks = Personal_task.objects.all()
-    return render(request, 'assigned_task.html')
+        return render(request, 'assigned_task.html',{'user':user})
+    else:
+        return redirect('login')
 
 
 def view_assigned_tasks(request):
-    if 'user_id' in request.session:
-        user_id = request.session['user_id']
+    user_id = request.session.get("user_id")
+    if user_id:
+        user = User.objects.get(user_id=user_id)
         tasks = Task.objects.filter(user_id=User.objects.get(user_id=request.session['user_id']))
-        return render(request, 'admin_assigned_task.html', {'tasks': tasks})
+        return render(request, 'admin_assigned_task.html', {'tasks': tasks,'user':user})
     else:
         return redirect('/login')
 
 def team_management(request):
-    if 'user_id' in request.session:
-        user_id = request.session['user_id']
+    user_id = request.session.get("user_id")
+    if user_id:
+        user = User.objects.get(user_id=user_id)
         team_managements = Team_management.objects.all()
-        return render(request, 'team_assigned_task.html', {'team': team_managements})
+        return render(request, 'team_assigned_task.html', {'team': team_managements,'user':user})
     else:
         return redirect('/login')
 
 
 def edit_task_status(request, task_id):
-    if 'user_id' in request.session:
-        user_id = request.session['user_id']
+    user_id = request.session.get("user_id")
+    if user_id:
+        user = User.objects.get(user_id=user_id)
         task = Task.objects.get( task_id=task_id)
         if request.method == 'POST':
             new_status = request.POST.get('status')
@@ -284,13 +310,14 @@ def edit_task_status(request, task_id):
             else:
                 return render(request, 'edit_task.html', {'task': task, 'error': 'Invalid status value.'})
 
-        return render(request, 'edit_task.html', {'task': task})
+        return render(request, 'edit_task.html', {'task': task,'user':user})
     else:
         return redirect('/login')
 
-def edit_task(request,task_id):
-    if 'user_id' in request.session:
-        user_id = request.session['user_id']
+def edit_team(request,task_id):
+    user_id = request.session.get("user_id")
+    if user_id:
+        user = User.objects.get(user_id=user_id)
         task = Task.objects.get( task_id=task_id)
         if request.method == 'POST':
             new_status = request.POST.get('status')
@@ -302,19 +329,21 @@ def edit_task(request,task_id):
             else:
                 return render(request, 'edit_task.html', {'task': task, 'error': 'Invalid status value.'})
 
-        return render(request, 'edit_task.html', {'task': task})
+        return render(request, 'edit_task.html', {'task': task,'user':user})
     else:
         return redirect('/login')
 def project(request):
-    if 'user_id' in request.session:
-        user_id = request.session['user_id']
+    user_id = request.session.get("user_id")
+    if user_id:
+        user = User.objects.get(user_id=user_id)
         tasks = Project.objects.filter(user_id=User.objects.get(user_id=request.session['user_id']))
-        return render(request, 'project.html', {'project': tasks})
+        return render(request, 'project.html', {'project': tasks,'user':user})
     else:
         return redirect('/login')
 def edit_project(request,project_id):
-    if 'user_id' in request.session:
-        user_id = request.session['user_id']
+    user_id = request.session.get("user_id")
+    if user_id:
+        user = User.objects.get(user_id=user_id)
         task = Project.objects.get( project_id=project_id)
         if request.method == 'POST':
             new_status = request.POST.get('status')
@@ -326,14 +355,15 @@ def edit_project(request,project_id):
             else:
                 return render(request, 'edit_project.html', {'task': task, 'error': 'Invalid status value.'})
 
-        return render(request, 'edit_project.html', {'task': task})
+        return render(request, 'edit_project.html', {'task': task,'user':user})
     else:
         return redirect('/login')
 def profile(request):
-    if 'user_id' in request.session:
-        user = request.session['user_id']
-        data = User.objects.filter(user_id=user)
-        return render(request, 'profile.html', {'user': data})
+    user_id = request.session.get("user_id")
+    if user_id:
+        user = User.objects.get(user_id=user_id)
+        data = User.objects.filter(user_id=user_id)
+        return render(request, 'profile.html', {'users': data,'user':user})
     else:
         return redirect('/login')
 
@@ -361,9 +391,32 @@ def edit_profile(request):
         return render(request, 'edit_profile.html', {'user': user})
 
 def report(request):
-    if 'user_id' in request.session:
-        user = request.session['user_id']
-        tasks = Personal_task.objects.filter(user_id=User.objects.get(user_id=request.session['user_id']))
-        return render(request, 'view_personal_task.html', {'tasks': tasks})
+    user_id = request.session.get("user_id")
+    if user_id:
+        user = User.objects.get(user_id=user_id)
+        tasks = Personal_task.objects.filter(user_id=user_id, status='complete')
+        report=Reports.objects.all()
+        return render(request, 'report.html', {'tasks': tasks,'user':user,'report':report})
+    else:
+        return redirect('/login')
+def report_update(request,personal_task_id):
+    user_id = request.session.get("user_id")
+    if user_id:
+        user = User.objects.get(user_id=user_id)
+        data = Personal_task.objects.filter(personal_task_id=personal_task_id)
+        task = Personal_task.objects.get(personal_task_id=personal_task_id)
+        if request.method == "POST":
+            description = request.POST.get('description')
+            status = request.POST.get('personal_task_id')
+            created_at=request.POST.get('created_at')
+            data = Reports()
+            data.description = description
+            data.personal_task_id = task
+            data.created_at = data
+            # users_id=user
+            data.save()
+
+            return redirect('/report')
+        return render(request, 'report_update.html', {'tasks': data, 'user': user})
     else:
         return redirect('/login')

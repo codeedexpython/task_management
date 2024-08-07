@@ -39,7 +39,8 @@ urlpatterns = [
     path('team_assigned_task',views.team_management),
     path('project',views.project),
     path('edit_task/<int:task_id>',views.edit_task_status),
-    path('edit_team/<int:task_id>/',views.edit_task),
+    path('edit_team/<int:task_id>/',views.edit_team),
     path('edit_project/<int:project_id>/',views.edit_project),
-    path('report',views.report)
+    path('report',views.report),
+    path('report_update/<int:personal_task_id>',views.report_update)
 ]

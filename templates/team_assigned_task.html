@@ -230,7 +230,7 @@
   </tr>
     {% for x in team %}
       <tr>
-        <td>{{x.id}}</td>
+                 <td>{{x.id}}</td>            <input type="hidden" id="product_name" name="task_id" class="form-control" placeholder="" value="{{ x.task_id.task_id }}">
 
     <td>{{x.user_id.firstname}}</td>
     <td>{{x.team_id.team_name}}</td>
@@ -250,7 +250,7 @@
 
 
 <!--        <td><a style="text-decoration:none;" href="remove/{{x.personal_task_id}}"> Remove</a>-->
-          <td>  <a style="text-decoration:none;" href="edit_team/{{x.task_id}}/">Update</a></td>
+          <td>  <a style="text-decoration:none;" href="edit_team/{{x.task_id.task_id}}/">Update</a></td>
 <!--            <div class="dropdown">-->
 <!--                <a href="#" style="text-decoration:none;" class="dropdown-toggle" type="choose" id="dropdownMenu" data-bs-toggle="dropdown" aria-expanded="false">More</a>-->
 <!--                <ul class="dropdown-menu" aria-labelledby="dropdownMenu">-->
@@ -270,7 +270,9 @@
 
 
                             </ul>
+      </tr>
                         </div>
+            </div>
 
         </td>
   </tr>

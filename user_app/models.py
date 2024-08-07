@@ -55,5 +55,5 @@ class Reports(models.Model):
     description = models.TextField(blank=True, null=True)
     personal_task_id = models.ForeignKey(Personal_task, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
-    export_data = models.JSONField()
+    export_data = models.JSONField(blank=True, null=True)
 
